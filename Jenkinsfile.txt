@@ -1,0 +1,192 @@
+pipeline {
+    agent any
+    
+    environment {
+        
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'latest', url: 'https://github.com/jaiswaladi246/10-Tier-MicroService-Appliction.git'
+            }
+        }
+        
+        stage('SonarQube') {
+            steps {
+                
+                withSonarQubeEnv('sonar') {
+                    sh ''' $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectKey=10-Tier -Dsonar.projectName=10-Tier -Dsonar.java.binaries=. '''
+                }
+               
+            }
+        }
+        
+        stage('adservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/adservice/') {
+                                 sh "docker build -t admin/adservice:latest ."
+                                 sh "docker push admin/adservice:latest"
+								 sh " docker rmi adijaiswal/adservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('cartservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/cartservice/src/') {
+                                 sh "docker build -t admin/cartservice:latest ."
+                                 sh "docker push admin/cartservice:latest"
+								 sh " docker rmi admin/cartservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('checkoutservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/checkoutservice/') {
+                                 sh "docker build -t admin/checkoutservice:latest ."
+                                 sh "docker push admin/checkoutservice:latest"
+								 sh " docker rmi admin/checkoutservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('currencyservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/currencyservice/') {
+                                 sh "docker build -t admin/currencyservice:latest ."
+                                 sh "docker push admin/currencyservice:latest"
+								 sh " docker rmi admin/currencyservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+        
+		stage('emailservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/emailservice/') {
+                                 sh "docker build -t admin/emailservice:latest ."
+                                 sh "docker push admin/emailservice:latest"
+								 sh " docker rmi admin/emailservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('frontend') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/frontend/') {
+                                 sh "docker build -t admin/frontend:latest ."
+                                 sh "docker push admin/frontend:latest"
+								 sh " docker rmi admin/frontend:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('loadgenerator') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/loadgenerator/') {
+                                 sh "docker build -t admin/loadgenerator:latest ."
+                                 sh "docker push admin/loadgenerator:latest"
+								 sh " docker rmi admin/loadgenerator:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('paymentservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/paymentservice/') {
+                                 sh "docker build -t admin/paymentservice:latest ."
+                                 sh "docker push admin/paymentservice:latest"
+								  sh " docker rmi admin/paymentservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+        
+		stage('productcatalogservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/productcatalogservice/') {
+                                 sh "docker build -t admin/productcatalogservice:latest ."
+                                 sh "docker push admin/productcatalogservice:latest"
+								 sh " docker rmi admin/productcatalogservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('recommendationservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/recommendationservice/') {
+                                 sh "docker build -t admin/recommendationservice:latest ."
+                                 sh "docker push admin/recommendationservice:latest"
+								 sh " docker rmi admin/recommendationservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+		
+		stage('shippingservice') {
+            steps {
+                script{
+                    withDockerRegistry(credentialsId: 'docker-cred', toolName: 'docker') {
+                          dir('/var/lib/jenkins/workspace/10-Tier/src/shippingservice/') {
+                                 sh "docker build -t admin/shippingservice:latest ."
+                                 sh "docker push admin/shippingservice:latest"
+								 sh " docker rmi admin/shippingservice:latest"
+                        }
+                    }
+                }
+            }
+        }
+        
+        
+        	stage('K8-Deploy') {
+            steps {
+                withKubeConfig(caCertificate: '', clusterName: 'my-eks8', contextName: '', credentialsId: 'k8-token', namespace: 'webapps', restrictKubeConfigAccess: false, serverUrl: 'https://2BCD568E04EC6456125F85067AFE81B9.gr7.ap-south-1.eks.amazonaws.com') {
+                         sh 'kubectl apply -f deployment-service.yml'
+                         sh 'kubectl get pods '
+                         sh 'kubectl get svc'
+                }
+            }
+        }
+        
+    }
+}
